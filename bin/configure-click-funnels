@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+
+require 'bundler/inline'
+require 'colorize'
+require 'active_support'
+
+gemfile do
+  source 'https://rubygems.org'
+  require 'fileutils'
+  require 'colorize'
+end
+
+def modify_omniauth_source
+  text = File.read("Gemfile")
+  content = text.gsub("gem 'omniauth-click_funnels'", "gem 'omniauth-click_funnels', github: 'andrewculver/omniauth-click_funnels'")
+  File.open("Gemfile", "w") { |file| file << content }
+end
+
+# path to your application root.
+APP_ROOT = File.expand_path("..", __dir__)
+
+def system!(*args)
+  system(*args) || abort("\n== Command #{args} failed ==")
+end
+
+FileUtils.chdir APP_ROOT do
+  puts "\n== Generating ClickFunnelsAccount =="
+  system! "bin/rails g model Oauth::ClickFunnelsAccount uid:string data:jsonb user:references"
+  # this one works
+  system! "bin/rails g model Integrations::ClickFunnelsInstallation team:references oauth_click_funnels_account:references name:string"
+  system! "bin/rails g model Webhooks::Incoming::Oauth::ClickFunnelsAccountWebhook data:jsonb processed_at:datetime verified_at:datetime oauth_click_funnels_account:references"
+
+  puts "\n== Generating Super Scaffold Oauth Provider =="
+  system! "bin/rails g super_scaffold:oauth_provider omniauth-click_funnels click_funnels Oauth::ClickFunnelsAccount CLICK_FUNNELS_API_KEY CLICK_FUNNELS_API_SECRET_KEY --icon=ti-user"
+
+  modify_omniauth_source
+
+  puts "\n==  Installing Omniauth Gem =="
+  system! "bundle install"
+
+
+  puts "\n== Temp Fix - Requires Updates =="
+  puts "\n==  update the index name in `create_webhooks_incoming_oauth_click_funnels_account_webhooks.rb` to `index_cf_webhooks_on_oauth_click_funnels_account_id` =="
+  puts "\n==  update the index name in `create_integrations_click_funnels_installations.rb` to `index_cf_installations_on_oauth_click_funnels_account_id` =="
+  puts "\n==  Run bin/rails db:migrate after indexes are updated =="
+
+  # fix index length
+  # puts "\n==  Fixing Index Names =="
+  # system! "bin/rails db:migrate | bin/fix-migration-index-name"
+
+end
