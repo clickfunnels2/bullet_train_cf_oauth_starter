@@ -1,11 +1,11 @@
 en:
   application:
-    name: Untitled Application
+    name: Bullet Train Click Funnels Starter
     owner: Unidentified Developer
     description: "You can update this description in `config/locales/en/application.en.yml`."
-    keywords: untitled application seo keywords
+    keywords: bullet train click funnels starter seo keywords
     support_email: change.me@localhost
-    key: untitled_application
+    key: bullet_train_click_funnels_starter
   webhooks/outgoing/endpoints:
     fields:
       api_version:
