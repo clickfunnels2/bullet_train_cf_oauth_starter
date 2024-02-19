@@ -28,3 +28,59 @@ If this is your first time working on a Bullet Train application, be sure to rev
 Clicking this button will take you to the first step of a process that, when completed, will provision production-grade infrastructure for your Bullet Train application which will cost about **$30/month**.
 
 When you're done deploying to Render, you need to go into "Dashboard" > "web", copy the server URL, and then go into "Env Groups" > "settings" and paste the URL into the value for `BASE_URL`.
+
+### Adding ClickFunnels OmniAuth
+
+<!-- `chmod a+x ./bin/configure-click-funnels` -->
+
+Run
+
+`bin/configure-click-funnels` to generate the required models and migrations for
+adding ClickFunnels as an OmniAuth option.
+
+You can also view an example of the completed OmniAuth implementation on the
+`completed-oauth-setup` branch.
+
+> [!NOTE]
+> There is currently a manual fix required to fix issues with the generated
+> index names being too long.
+
+> You will need to update these index names manually to succefully run the new
+> migrations.
+
+> Below are examples of how the migrations should look after updating the index
+> names.
+
+`_create_webhooks_incoming_oauth_click_funnels_account_webhooks.rb`
+```ruby
+
+class CreateWebhooksIncomingOauthClickFunnelsAccountWebhooks < ActiveRecord::Migration[7.1]
+  def change
+    create_table :webhooks_incoming_oauth_click_funnels_account_webhooks do |t|
+      t.jsonb :data
+      t.datetime :processed_at
+      t.datetime :verified_at
+      t.references :oauth_click_funnels_account, null: true, foreign_key: true, index: {name: "index_cf_webhooks_on_oauth_click_funnels_account_id"}
+
+      t.timestamps
+    end
+  end
+end
+
+```
+
+` _create_integrations_click_funnels_installations.rb`
+```ruby
+class CreateIntegrationsClickFunnelsInstallations < ActiveRecord::Migration[7.1]
+  def change
+    create_table :integrations_click_funnels_installations do |t|
+      t.references :team, null: false, foreign_key: true
+      t.references :oauth_click_funnels_account, null: false, foreign_key: true, index: {name: "index_cf_installations_on_oauth_click_funnels_account_id"}
+      t.string :name
+
+      t.timestamps
+    end
+  end
+end
+
+```
