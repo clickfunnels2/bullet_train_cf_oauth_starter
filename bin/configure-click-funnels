@@ -2,7 +2,6 @@
 
 require 'bundler/inline'
 require 'colorize'
-require 'active_support'
 
 gemfile do
   source 'https://rubygems.org'
