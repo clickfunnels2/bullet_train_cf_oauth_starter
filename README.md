@@ -44,10 +44,10 @@ You can also view an example of the completed OmniAuth implementation on the
 > [!NOTE]
 > There is currently a manual fix required to fix issues with the generated
 > index names being too long.
-
+>
 > You will need to update these index names manually to succefully run the new
 > migrations.
-
+>
 > Below are examples of how the migrations should look after updating the index
 > names.
 
